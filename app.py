@@ -6,7 +6,6 @@ import time
 import math
 import os
 from collections import deque
-from datetime import datetime
 from pathlib import Path
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -38,6 +37,30 @@ MARK_FIGHT_KEY = "f8"
 
 OUTPUT_DIR = Path("output")
 OUTPUT_DIR.mkdir(exist_ok=True)
+
+LATEST_VIDEO = OUTPUT_DIR / "latest_fight.mp4"
+LATEST_CSV = OUTPUT_DIR / "latest_fight.csv"
+
+
+def clear_old_output():
+    """Keep output ephemeral: remove previous generated fight files."""
+    patterns = (
+        "fight_*.mp4",
+        "fight_*.csv",
+        "latest_fight.mp4",
+        "latest_fight.csv",
+    )
+
+    for pattern in patterns:
+        for path in OUTPUT_DIR.glob(pattern):
+            try:
+                path.unlink()
+            except OSError:
+                pass
+
+
+# Start each app session with no saved engagement history.
+clear_old_output()
 
 
 # ------------------------------------------------------------
@@ -258,9 +281,16 @@ def save_recent_clip(items):
     if not items:
         return
 
-    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    video_path = OUTPUT_DIR / f"fight_{stamp}.mp4"
-    csv_path = OUTPUT_DIR / f"fight_{stamp}.csv"
+    # Keep only one engagement on disk. Every new analysis replaces it.
+    for path in (LATEST_VIDEO, LATEST_CSV):
+        try:
+            if path.exists():
+                path.unlink()
+        except OSError:
+            pass
+
+    video_path = LATEST_VIDEO
+    csv_path = LATEST_CSV
 
     first = cv2.imdecode(np.frombuffer(items[0][1], np.uint8), cv2.IMREAD_COLOR)
     if first is None:

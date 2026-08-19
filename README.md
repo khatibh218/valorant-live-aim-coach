@@ -8,7 +8,7 @@ It gives **general camera / aim-control feedback** from your screen capture:
 - stability score
 - micro-correction / reversal tendency
 - immediate post-fight movement summary
-- rolling 5-second clip saved when you mark an engagement
+- rolling 5-second clip for the latest marked engagement only
 
 It does **not** detect enemy heads live, identify enemy positions, or tell you where an enemy is during an active fight.
 
@@ -60,8 +60,8 @@ Immediately after an engagement ends, press:
 The app will:
 1. analyze the recent rolling buffer
 2. show a movement summary
-3. save the recent clip in `output/`
-4. save motion data as a CSV file
+3. replace `output/latest_fight.mp4` with the newest clip
+4. replace `output/latest_fight.csv` with the newest motion data
 
 You can also click **Mark Fight (F8)** on the dashboard.
 
@@ -91,9 +91,11 @@ A large number can indicate excessive micro-correction.
 
 ## Output clips
 
-Every time you press F8, the recent rolling buffer is written to:
+Every time you press F8, the recent rolling buffer replaces:
 
-`output/fight_YYYYMMDD_HHMMSS.mp4`
+`output/latest_fight.mp4`
+
+Only the latest engagement is kept. Previous generated fight clips and CSV files are removed.
 
 The video includes:
 - a center-screen reference cross
@@ -102,7 +104,7 @@ The video includes:
 
 The arrow represents estimated camera motion only. It is not an opponent direction indicator.
 
-The matching CSV contains:
+The matching `output/latest_fight.csv` contains:
 
 ```text
 timestamp,dx,dy,speed
